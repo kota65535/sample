@@ -1,0 +1,105 @@
+@import 'antd/dist/reset.css';
+
+/* Layout styles */
+.app-container {
+  min-height: 100vh;
+  background-color: #f0f2f5;
+  padding: 24px 0;
+}
+
+.todo-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 0 16px;
+}
+
+.todo-card {
+  box-shadow: 0 1px 2px -2px rgba(0, 0, 0, 0.16), 
+              0 3px 6px 0 rgba(0, 0, 0, 0.12), 
+              0 5px 12px 4px rgba(0, 0, 0, 0.09);
+}
+
+.todo-title {
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.todo-form-container {
+  margin-bottom: 16px;
+}
+
+.todo-form {
+  width: 100%;
+}
+
+.todo-form-input {
+  flex-grow: 1;
+}
+
+.todo-table-container {
+  margin-bottom: 16px;
+}
+
+.todo-filter-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 16px;
+  flex-wrap: wrap;
+}
+
+.todo-counter {
+  text-align: center;
+  margin-top: 16px;
+}
+
+/* Table styles */
+.ant-table-row {
+  transition: all 0.3s;
+  
+  &:hover {
+    background-color: rgba(0, 0, 0, 0.02);
+  }
+}
+
+.ant-table-cell {
+  vertical-align: middle !important;
+}
+
+.ant-table-middle .ant-table-cell {
+  padding: 10px 16px !important;
+}
+
+/* Action buttons */
+.todo-actions {
+  display: flex;
+}
+
+.todo-action-button {
+  margin-right: 8px;
+  cursor: pointer;
+}
+
+.todo-completed-icon {
+  color: #52c41a;
+}
+
+.todo-active-icon {
+  color: #d9d9d9;
+}
+
+.todo-delete-icon {
+  color: #ff4d4f;
+}
+
+/* Responsive adjustments */
+@media (max-width: 576px) {
+  .todo-filter-container {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .todo-filter-clear {
+    margin-top: 16px;
+  }
+}
