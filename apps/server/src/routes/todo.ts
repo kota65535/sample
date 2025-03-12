@@ -2,7 +2,7 @@ import { Hono } from 'hono'
 import { HTTPException } from 'hono/http-exception'
 import { zValidator } from '@hono/zod-validator'
 import { z } from 'zod'
-import { createTodo, deleteTodo, getTodo, getTodos, updateTodo } from "@/db";
+import { createTodo, deleteTodo, getTodo, getTodos, updateTodo } from "../db";
 
 const app = new Hono()
 
@@ -29,6 +29,12 @@ const todoRoute = app
     // Get Todos
     .get('/', async (c) => {
         let todos = await getTodos();
+        try {
+            todos = await getTodos();
+        } catch (error) {
+            console.error(error)
+            throw new HTTPException(500);
+        }
         return c.json({ todos })
     })
     // Get Single Todo
