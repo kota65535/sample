@@ -1,0 +1,52 @@
+$schema: https://raw.githubusercontent.com/kota65535/firepit/refs/heads/main/schema.json
+
+tasks:
+  build:
+    command: |
+      tsc
+      vite build
+    depends_on:
+      - '#install'
+
+  dev:
+    command: bunx vite
+    vars:
+      server_port: '3000'
+      db_port: '3306'
+    depends_on:
+      - '#install'
+      - task: server#dev
+        vars:
+          port: "{{ server_port }}"
+          db_port: "{{ db_port }}"
+    service:
+      healthcheck:
+        log: VITE.*ready
+
+  e2e-init:
+    command: bunx playwright install --with-deps chromium
+
+  e2e-run:
+    command: bunx playwright test
+    depends_on:
+      - e2e-init
+      - task: dev
+        vars:
+          server_port: '3002'
+          db_port: '3308'
+
+  e2e:
+    command: bunx playwright test --ui
+    depends_on:
+      - e2e-init
+      - task: dev
+        vars:
+          server_port: '3002'
+          db_port: '3308'
+
+  test:
+    command: bunx vitest run
+    env:
+      NODE_ENV: test
+    depends_on:
+      - db#dev

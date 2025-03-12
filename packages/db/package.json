@@ -1,0 +1,12 @@
+{
+  "name": "@sample/db",
+  "main": "prisma-client/index.js",
+  "scripts": {
+    "prisma:generate": "prisma generate",
+    "prisma:push": "prisma db push"
+  },
+  "dependencies": {
+    "@prisma/client": "6.4.1",
+    "prisma": "6.4.1"
+  }
+}

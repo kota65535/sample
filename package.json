@@ -1,6 +1,12 @@
 {
   "name": "sample",
   "workspaces": [
-    "apps/*"
-  ]
+    "apps/*",
+    "packages/*"
+  ],
+  "devDependencies": {
+    "@types/bun": "1.2.5",
+    "biome": "0.3.3",
+    "typescript": "5.8.2"
+  }
 }

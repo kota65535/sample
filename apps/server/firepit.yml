@@ -1,0 +1,37 @@
+$schema: https://raw.githubusercontent.com/kota65535/firepit/refs/heads/main/schema.json
+
+tasks:
+  build:
+    command: |
+      bun build src/index.ts --compile --target bun-linux-arm64 --outfile dist/app 
+      cp ../../packages/db/prisma-client/libquery_engine-linux-arm64-openssl-3.0.x.so.node dist/
+      docker build .
+    depends_on:
+      - db#generate
+
+  dev:
+    label: "{{ task }} ({{ port }})"
+    command: bun run --hot src/index.ts
+    vars:
+      port: '3000'
+      db_port: '3306'
+    env:
+      PORT: "{{ port }}"
+      DATABASE_URL: "mysql://root@localhost:{{ db_port }}/example"
+    depends_on:
+      - task: db#dev
+        vars:
+          port: "{{ db_port }}"
+    service:
+      healthcheck:
+        log: 'Started server .*:{{ port }}'
+
+  test:
+    command: bun test
+    env:
+      DATABASE_URL: mysql://root@localhost:3307/example
+    depends_on:
+      - task: dev
+        vars:
+          port: '3001'
+          db_port: '3307'

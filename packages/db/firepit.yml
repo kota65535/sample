@@ -1,0 +1,44 @@
+$schema: https://raw.githubusercontent.com/kota65535/firepit/refs/heads/main/schema.json
+
+tasks:
+  generate:
+    command: bun run prisma:generate
+    depends_on:
+      - "#install"
+    inputs:
+      - prisma/schema.prisma
+
+  dev-raw:
+    label: "{{ task }} ({{ port }})"
+    command: |
+      trap "kill -QUIT -- -$$" SIGINT
+      docker run \
+        -p {{ port }}:3306 \
+        -e MYSQL_ALLOW_EMPTY_PASSWORD=yes \
+        mysql:8.0 &
+      pid=$!
+      while kill -0 $pid &> /dev/null; do wait; done
+    vars:
+      port: 3306
+    service:
+      healthcheck:
+        log: 'ready for connections.*port: 3306'
+    depends_on:
+      - generate
+
+  dev:
+    label: "{{ task }} ({{ port }})"
+    command: |
+      npx prisma db push
+      read -p "Hit enter: "
+    vars:
+      port: 3306
+    env:
+      DATABASE_URL: mysql://root@localhost:{{ port }}/example
+    service:
+      healthcheck:
+        log: Hit enter
+    depends_on:
+      - task: dev-raw
+        vars:
+          port: "{{ port }}"

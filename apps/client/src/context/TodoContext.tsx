@@ -1,15 +1,17 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { v4 as uuidv4 } from 'uuid';
 import { Todo } from '../types/todo';
+import { todoApi } from '../api/todoApi';
 
 interface TodoContextType {
   todos: Todo[];
-  addTodo: (title: string) => void;
-  toggleTodo: (id: string) => void;
-  deleteTodo: (id: string) => void;
-  clearCompleted: () => void;
+  addTodo: (title: string) => Promise<void>;
+  toggleTodo: (id: string) => Promise<void>;
+  deleteTodo: (id: string) => Promise<void>;
+  clearCompleted: () => Promise<void>;
   activeTodos: Todo[];
   completedTodos: Todo[];
+  isLoading: boolean;
+  error: string | null;
 }
 
 const TodoContext = createContext<TodoContextType | undefined>(undefined);
@@ -27,49 +29,92 @@ interface TodoProviderProps {
 }
 
 export const TodoProvider: React.FC<TodoProviderProps> = ({ children }) => {
-  const [todos, setTodos] = useState<Todo[]>(() => {
-    const savedTodos = localStorage.getItem('todos');
-    if (savedTodos) {
-      return JSON.parse(savedTodos).map((todo: any) => ({
-        ...todo,
-        createdAt: new Date(todo.createdAt)
-      }));
-    }
-    return [];
-  });
+  const [todos, setTodos] = useState<Todo[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    localStorage.setItem('todos', JSON.stringify(todos));
-  }, [todos]);
+    const fetchTodos = async () => {
+      setIsLoading(true);
+      try {
+        const data = await todoApi.getAllTodos();
+        setTodos(data);
+        setError(null);
+      } catch (err) {
+        setError('Failed to fetch todos');
+        console.error('Error fetching todos:', err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
-  const addTodo = (title: string) => {
-    if (title.trim()) {
-      setTodos([
-        ...todos,
-        {
-          id: uuidv4(),
-          title: title.trim(),
-          completed: false,
-          createdAt: new Date()
-        }
-      ]);
+    fetchTodos();
+  }, []);
+
+  const addTodo = async (title: string) => {
+    if (!title.trim()) return;
+
+    setIsLoading(true);
+    try {
+      const newTodo = await todoApi.createTodo(title);
+      setTodos([...todos, newTodo]);
+      setError(null);
+    } catch (err) {
+      setError('Failed to add todo');
+      console.error('Error adding todo:', err);
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  const toggleTodo = (id: string) => {
-    setTodos(
-      todos.map(todo =>
-        todo.id === id ? { ...todo, completed: !todo.completed } : todo
-      )
-    );
+  const toggleTodo = async (id: string) => {
+    setIsLoading(true);
+    try {
+      const todoToUpdate = todos.find(todo => todo.id === id);
+      if (!todoToUpdate) return;
+
+      const updatedTodo = await todoApi.updateTodo(id, {
+        completed: !todoToUpdate.completed
+      });
+
+      setTodos(todos.map(todo =>
+        todo.id === id ? updatedTodo : todo
+      ));
+      setError(null);
+    } catch (err) {
+      setError('Failed to update todo');
+      console.error('Error updating todo:', err);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const deleteTodo = (id: string) => {
-    setTodos(todos.filter(todo => todo.id !== id));
+  const deleteTodo = async (id: string) => {
+    setIsLoading(true);
+    try {
+      await todoApi.deleteTodo(id);
+      setTodos(todos.filter(todo => todo.id !== id));
+      setError(null);
+    } catch (err) {
+      setError('Failed to delete todo');
+      console.error('Error deleting todo:', err);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const clearCompleted = () => {
-    setTodos(todos.filter(todo => !todo.completed));
+  const clearCompleted = async () => {
+    setIsLoading(true);
+    try {
+      await todoApi.deleteCompletedTodos();
+      setTodos(todos.filter(todo => !todo.completed));
+      setError(null);
+    } catch (err) {
+      setError('Failed to clear completed todos');
+      console.error('Error clearing completed todos:', err);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const activeTodos = todos.filter(todo => !todo.completed);
@@ -84,7 +129,9 @@ export const TodoProvider: React.FC<TodoProviderProps> = ({ children }) => {
         deleteTodo,
         clearCompleted,
         activeTodos,
-        completedTodos
+        completedTodos,
+        isLoading,
+        error
       }}
     >
       {children}
