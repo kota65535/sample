@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from 'bun:test'
 import { hc } from 'hono/client'
-import { AppType } from '../src/index'
+import { AppType } from 'src/'
 import { PrismaClient } from "@sample/db/prisma-client";
 
 const client = hc<AppType>('http://localhost:3001/')
