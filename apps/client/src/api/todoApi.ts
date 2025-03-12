@@ -12,3 +12,10 @@ export const getTodos = async () => {
     const data = await res.json();
     return data;
 }
+
+
+export const getTodo = async (id: string) => {
+    const res = await client.todos[":id"].$get({ param: { id } });
+    const data = await res.json();
+    return data;
+}
