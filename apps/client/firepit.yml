@@ -49,4 +49,4 @@ tasks:
     env:
       NODE_ENV: test
     depends_on:
-      - db#dev
+      - server#dev

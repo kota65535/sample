@@ -24,7 +24,7 @@ tasks:
           port: "{{ db_port }}"
     service:
       healthcheck:
-        log: 'Started server .*:{{ port }}'
+        log: 'Started development server: .*:{{ port }}'
 
   test:
     command: bun test

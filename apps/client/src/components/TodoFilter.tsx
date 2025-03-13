@@ -1,10 +1,11 @@
-import React from 'react';
 import { Radio, Button } from 'antd';
 import { Link, useLocation } from 'react-router-dom';
-import { useTodo } from '../context/TodoContext';
 
-const TodoFilter: React.FC = () => {
-  const { clearCompleted, completedTodos } = useTodo();
+type TodoFilterProps = {
+  hasCompleted: boolean
+}
+
+const TodoFilter = (props: TodoFilterProps) => {
   const location = useLocation();
   const currentFilter = location.pathname.split('/').pop() || 'all';
 
@@ -22,9 +23,9 @@ const TodoFilter: React.FC = () => {
         </Radio.Button>
       </Radio.Group>
       
-      {completedTodos.length > 0 && (
+      {props.hasCompleted && (
         <Button 
-          onClick={clearCompleted} 
+          onClick={() => "should delete completed"}
           className="todo-filter-clear"
           danger
         >

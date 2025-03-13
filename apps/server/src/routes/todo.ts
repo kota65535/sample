@@ -62,7 +62,7 @@ const todoRoute = app
             console.error(error)
             throw new HTTPException(500);
         }
-        return c.json(todo, 201)
+        return c.json(todo)
     })
     // Update Todo
     .put('/:id', zValidator('param', todoIdSchema), zValidator('json', todoUpdateSchema), async (c) => {
@@ -75,7 +75,7 @@ const todoRoute = app
             console.error(error)
             throw new HTTPException(500);
         }
-        return c.json(todo, 200)
+        return c.json(todo)
     })
     // Delete Todo
     .delete('/:id', zValidator('param', todoIdSchema), async (c) => {

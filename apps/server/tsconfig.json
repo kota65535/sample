@@ -3,11 +3,13 @@
     "strict": true,
     "jsx": "react-jsx",
     "jsxImportSource": "hono/jsx",
-    "baseUrl": "./",
-    "paths": {
-      "@/*": [
-        "./src/*"
-      ]
-    }
+    "noImplicitAny": true,
+    // "baseUrl": "./",
+    // "paths": {
+    //   "@/*": [
+    //     "./src/*"
+    //   ]
+    // }
+    "emitDeclarationOnly": true
   }
 }

@@ -1,18 +1,20 @@
 import React, { useState } from 'react';
 import { Form, Input, Button } from 'antd';
 import { PlusOutlined } from '@ant-design/icons';
-import { useTodo } from '../context/TodoContext';
+import {useCreateTodo} from "../hooks/todo.ts";
 
 const TodoForm: React.FC = () => {
   const [form] = Form.useForm();
-  const { addTodo } = useTodo();
+  const { trigger: createTodo } = useCreateTodo();
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = ({ title }: { title: string }) => {
     if (!title.trim()) return;
     
     setLoading(true);
-    addTodo(title);
+    createTodo({
+      title
+    });
     form.resetFields();
     setLoading(false);
   };

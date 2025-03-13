@@ -1,5 +1,13 @@
 import { createContext, ReactNode, useEffect, useState } from 'react';
-import { Env, loadEnv } from './index.ts';
+import {Env, schema} from "../env/type.ts";
+
+const ENV_FILE = "env.json"
+
+export const loadEnv = async (baseUrl?: string): Promise<Env> => {
+  const response = await fetch(`${baseUrl ?? ''}/${ENV_FILE}`)
+  const config = await response.json()
+  return schema.parse(config)
+}
 
 export type EnvProviderProps = {
   children: ReactNode;

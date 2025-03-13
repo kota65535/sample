@@ -8,31 +8,13 @@ tasks:
     inputs:
       - prisma/schema.prisma
 
-  dev-raw:
-    label: "{{ task }} ({{ port }})"
-    command: |
-      trap "kill -QUIT -- -$$" SIGINT
-      docker run \
-        -p {{ port }}:3306 \
-        -e MYSQL_ALLOW_EMPTY_PASSWORD=yes \
-        mysql:8.0 &
-      pid=$!
-      while kill -0 $pid &> /dev/null; do wait; done
-    vars:
-      port: 3306
-    service:
-      healthcheck:
-        log: 'ready for connections.*port: 3306'
-    depends_on:
-      - generate
-
   dev:
     label: "{{ task }} ({{ port }})"
     command: |
       npx prisma db push
       read -p "Hit enter: "
     vars:
-      port: 3306
+      port: '3306'
     env:
       DATABASE_URL: mysql://root@localhost:{{ port }}/example
     service:
@@ -42,3 +24,22 @@ tasks:
       - task: dev-raw
         vars:
           port: "{{ port }}"
+
+  dev-raw:
+    label: "{{ task }} ({{ port }})"
+    vars:
+      port: '3306'
+    command: |
+      trap "kill -QUIT -- -$$" SIGINT
+      docker run \
+        -p {{ port }}:3306 \
+        -e MYSQL_ALLOW_EMPTY_PASSWORD=yes \
+        mysql:8.0 &
+      pid=$!
+      while kill -0 $pid &> /dev/null; do wait; done
+    service:
+      healthcheck:
+        log: 'ready for connections.*port: 3306'
+    depends_on:
+      - generate
+
