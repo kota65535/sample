@@ -4,15 +4,15 @@ import {useParams} from 'react-router-dom';
 import {CheckOutlined, DeleteOutlined} from '@ant-design/icons';
 import TodoForm from '../components/TodoForm';
 import TodoFilter from '../components/TodoFilter';
-import {GetTodoResponse, useGetTodos, useUpdateTodo} from "../hooks/todo.ts";
-import {deleteTodo} from "@sample/server/src/db.ts";
+import {GetTodoResponse, useDeleteTodo, useGetTodos, useUpdateTodo} from "../hooks/todo.ts";
 
 const {Title} = Typography;
 
 const TodoList: React.FC = () => {
     const {filter = 'all'} = useParams<{ filter?: string }>();
     const {data, error, isLoading} = useGetTodos()
-    const {trigger} = useUpdateTodo("1")
+    const {trigger: updateTodo} = useUpdateTodo()
+    const {trigger: deleteTodo} = useDeleteTodo()
     const [pageSize, setPageSize] = useState<number>(5);
 
     if (isLoading) return <p>Loading...</p>;
@@ -76,18 +76,22 @@ const TodoList: React.FC = () => {
             render: (_: any, record) => (
                 <div className="todo-actions">
                     <a
-                        onClick={() => {
-                            trigger({
+                        onClick={() => updateTodo({
+                            id: record.id,
+                            json: {
                                 ...record,
                                 completed: !record.completed
-                            })
-                        }}
+                            }
+                        })
+                        }
                         className="todo-action-button"
                     >
                         <CheckOutlined className={record.completed ? "todo-completed-icon" : "todo-active-icon"}/>
                     </a>
                     <a
-                        onClick={() => deleteTodo(record.id)}
+                        onClick={() => deleteTodo({
+                            id: record.id
+                        })}
                         className="todo-action-button"
                     >
                         <DeleteOutlined className="todo-delete-icon"/>

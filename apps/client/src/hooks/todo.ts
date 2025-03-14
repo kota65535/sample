@@ -2,11 +2,11 @@ import useSWR, {mutate} from "swr";
 import {useApiClient} from "../apis/hook";
 import {InferRequestType, InferResponseType} from "hono/client";
 import useSWRMutation from "swr/mutation";
-import { ServerApiClientType } from "../apis/types";
+import {ServerApiClientType} from "../apis/types";
 
 export type GetTodosResponse = InferResponseType<ServerApiClientType["todos"]["$get"]>
 
-export const useGetTodos = ()  => {
+export const useGetTodos = () => {
     const client = useApiClient("server")
     const cacheKey = "todos"
     const fetcher = async () => {
@@ -33,7 +33,7 @@ type CreateTodoRequest = InferRequestType<ServerApiClientType["todos"]["$post"]>
 export const useCreateTodo = () => {
     const client = useApiClient("server")
     const cacheKey = `todos`
-    const fetcher =async (_key: string, {arg}: { arg: CreateTodoRequest }) => {
+    const fetcher = async (_key: string, {arg}: { arg: CreateTodoRequest }) => {
         const res = await client.todos.$post({json: arg})
         return await res.json();
     }
@@ -52,14 +52,13 @@ export const useCreateTodo = () => {
 type UpdateTodoRequest = InferRequestType<ServerApiClientType["todos"][":id"]["$put"]>["json"]
 type UpdateTodoResponse = InferResponseType<ServerApiClientType["todos"][":id"]["$put"]>
 
-export const useUpdateTodo = (id: string) => {
+export const useUpdateTodo = () => {
     const client = useApiClient("server")
-    const cacheKey = `todos/${id}`
-    const fetcher = async (_key: string, {arg}: { arg: UpdateTodoRequest }) => {
-        const res = await client.todos[":id"].$put({param: {id: id}, json: arg})
+    const fetcher = async (_key: string, {arg}: { arg: {id: string, json: UpdateTodoRequest} }) => {
+        const res = await client.todos[":id"].$put({param: {id: arg.id}, json: arg.json})
         return await res.json();
     }
-    return useSWRMutation(cacheKey, fetcher, {
+    return useSWRMutation("todos", fetcher, {
         onSuccess: data => {
             mutate(`todos/${data.id}`, data, false)
             mutate<GetTodoResponse[], UpdateTodoResponse>(`todos`, data, {
@@ -71,15 +70,14 @@ export const useUpdateTodo = (id: string) => {
     })
 }
 
-export const useDeleteTodo = (id: string) => {
+export const useDeleteTodo = () => {
     const client = useApiClient("server")
-    const cacheKey = `todos/${id}`
-    const fetcher = async (_key: string) => {
-        await client.todos[":id"].$delete({param: {id}});
+    const fetcher = async (_key: string, {arg}: { arg: { id: string } }) => {
+        await client.todos[":id"].$delete({param: {id: arg.id}});
     }
-    return useSWRMutation(cacheKey, fetcher, {
-        onSuccess: () => {
-            mutate(`todos/${id}`, null, false)
+    return useSWRMutation("todos", fetcher, {
+        onSuccess: (_, key) => {
+            mutate(`todos/${key}`, undefined, false)
         }
     })
 }
